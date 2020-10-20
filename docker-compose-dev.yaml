@@ -4,6 +4,8 @@ services:
     container_name: server
     image: server:latest
     entrypoint: python3 /main.py
+    volumes:
+        - DataVolume1:/datavolume1
     environment:
       - PYTHONUNBUFFERED=1
       - SERVER_IP=server
@@ -19,8 +21,6 @@ services:
     environment:
       - CLI_ID=1
       - CLI_SERVER_ADDRESS=server:12345
-      - CLI_LOOP_LAPSE=1m2s
-      - CLI_LOOP_PERIOD=10s
     networks:
       - testing_net
     depends_on:
@@ -32,3 +32,8 @@ networks:
       driver: default
       config:
         - subnet: 172.25.125.0/24
+
+volumes:
+    DataVolume1:
+        external:
+            name: DataVolume1
