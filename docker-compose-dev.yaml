@@ -14,17 +14,19 @@ services:
     networks:
       - testing_net
 
-  client1:
-    container_name: client1
-    image: client:latest
-    entrypoint: /client
-    environment:
-      - CLI_ID=1
-      - CLI_SERVER_ADDRESS=server:12345
-    networks:
-      - testing_net
-    depends_on:
-      - server
+#  client1:
+#    container_name: client1
+#    image: client:latest
+#    entrypoint: /client
+#    volumes:
+#        - DataVolume1:/datavolume1
+#    environment:
+#      - CLI_ID=1
+#      - CLI_SERVER_ADDRESS=server:12345
+#    networks:
+#      - testing_net
+#    depends_on:
+#      - server
 
 networks:
   testing_net:
