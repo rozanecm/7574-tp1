@@ -106,7 +106,7 @@ admin-unregister-node:
 .PHONY: admin-register-node
 
 admin-query-node:
-	echo "query: $(NODE) $(NODE_PATH)" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
+	echo "query: $(NODE) $(NODE_PATH)" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345 > $(SAVE_TO_FILE)
 .PHONY: admin-register-node
 
 admin-shutdown-server:

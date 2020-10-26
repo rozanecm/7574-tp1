@@ -10,7 +10,8 @@ import re
 
 
 class BackupRequester:
-    def __init__(self, new_backup_path_queue_frm_backup_requester_to_nodes_manager, node_to_backup_queue_from_node_manager_to_backup_requester):
+    def __init__(self, new_backup_path_queue_frm_backup_requester_to_nodes_manager,
+                 node_to_backup_queue_from_node_manager_to_backup_requester):
 
         self.new_backup_path_queue_from_backup_requester_to_nodes_manager = new_backup_path_queue_frm_backup_requester_to_nodes_manager
         self.node_to_backup_queue_from_node_manager_to_backup_requester = node_to_backup_queue_from_node_manager_to_backup_requester
@@ -35,13 +36,14 @@ class BackupRequester:
         :return:
         """
         # TODO request backup and save it to file
-        filename = os.getcwd() + "/" + self.get_filename(node['node'], node['port'], node['path'], node['last_file_path'])
+        filename = os.getcwd() + "/" + self.get_filename(node['node'], node['port'], node['path'],
+                                                         node['last_file_path'])
         logging.info("will save tgz to {}".format(filename))
         s = socket.socket()
         logging.info("about to connect to {}, {}".format(node['node'], node['port']))
         s.connect((node['node'], node['port']))
-        s.send("{}:{}\n".format(node['path'],
-                                node['md5']).encode())
+        s.sendall("{}:{}\n".format(node['path'],
+                                   node['md5']).encode())
         res = s.recv(len("updates needed: y")).rstrip()
         logging.info("res: {}".format(res))
         res = res.decode()
@@ -67,7 +69,7 @@ class BackupRequester:
             return node_name + "-" + path.split("/")[0] + "-0.tgz"
 
     def get_number_of_backup(self, last_file_path, prefix):
-        return int(last_file_path.split(prefix)[1].split(".tgz")[0])+1
+        return int(last_file_path.split(prefix)[1].split(".tgz")[0]) + 1
 
     def log_action(self, msg):
         pass

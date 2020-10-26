@@ -7,6 +7,7 @@ import hashlib
 
 from concurrent.futures import ThreadPoolExecutor
 
+
 class Client:
     def __init__(self, port, client_id, listen_backlog, keep_client_running):
         logging.info("initializing client")
@@ -78,12 +79,12 @@ class Client:
             logging.info("new md5:      {}".format(self.md5Checksum(path_to_tgz)))
             logging.info("received md5: {}".format(md5))
             if self.md5Checksum(path_to_tgz) != md5:
-                client_sock.send("updates needed: y".encode())
+                client_sock.sendall("updates needed: y".encode())
                 self.send_tgz_to_client(client_sock, path_to_tgz)
                 self.remove_local_tgz(path_to_tgz)
             else:
                 logging.info("won't send tgz")
-                client_sock.send("updates needed: n".encode())
+                client_sock.sendall("updates needed: n".encode())
                 logging.info("before shutdown")
                 client_sock.shutdown(socket.SHUT_RDWR)
                 logging.info("before close")
@@ -120,7 +121,7 @@ class Client:
         with open(path_to_tgz, "rb") as f:
             chunk = f.read(1024)
             while chunk:
-                client_sock.send(chunk)
+                client_sock.sendall(chunk)
                 chunk = f.read(1024)
         logging.info("before shutdown after sending tgz")
         client_sock.shutdown(socket.SHUT_RDWR)

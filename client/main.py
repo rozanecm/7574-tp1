@@ -8,6 +8,7 @@ from ctypes import c_bool
 from common.client import Client
 from multiprocessing import Value
 
+
 def parse_config_params():
     """ Parse env variables to find program config params
 
@@ -50,6 +51,7 @@ def main():
     server = Client(config_params["port"], config_params['name'], config_params["listen_backlog"], keep_client_running)
     server.run()
     logging.info("terminating client {}".format(config_params["name"]))
+
 
 def initialize_log():
     """

@@ -11,7 +11,6 @@ from common.node_manager import NodeManager
 from multiprocessing import Process, Manager, Value, Queue, Pipe
 
 
-
 def parse_config_params():
     """ Parse env variables to find program config params
 
@@ -60,9 +59,13 @@ def main():
     node_to_backup_queue_from_node_manager_to_backup_requester = Queue()
 
     # Initialize server and start server loop
-    server = Server(config_params["port"], config_params["listen_backlog"], keep_server_running, admin_to_nodes_manager_msgs_queue)
-    node_manager = NodeManager(keep_server_running, admin_to_nodes_manager_msgs_queue, new_backup_path_queue_from_backup_requester_to_nodes_manager, node_to_backup_queue_from_node_manager_to_backup_requester)
-    backup_requester = BackupRequester(new_backup_path_queue_from_backup_requester_to_nodes_manager, node_to_backup_queue_from_node_manager_to_backup_requester)
+    server = Server(config_params["port"], config_params["listen_backlog"], keep_server_running,
+                    admin_to_nodes_manager_msgs_queue)
+    node_manager = NodeManager(keep_server_running, admin_to_nodes_manager_msgs_queue,
+                               new_backup_path_queue_from_backup_requester_to_nodes_manager,
+                               node_to_backup_queue_from_node_manager_to_backup_requester)
+    backup_requester = BackupRequester(new_backup_path_queue_from_backup_requester_to_nodes_manager,
+                                       node_to_backup_queue_from_node_manager_to_backup_requester)
 
     p1 = Process(target=server.run)
     p2 = Process(target=backup_requester.run)
