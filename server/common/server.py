@@ -68,11 +68,6 @@ class Server:
         split_msg = msg.split(":")
         if split_msg[0] == 'reg':
             self._register_client(split_msg[1])
-            # logging.info("[admin msg]: register")
-            # self.admin_to_nodes_manager_msgs_queue.put(split_msg[0])
-            # # send path to reg/unreg
-            # self.admin_to_nodes_manager_msgs_queue.put(msg)
-            # # self._register_client(msg)
         elif split_msg[0] == 'unreg':
             self._unregister_client(split_msg[1])
         elif split_msg[0] == 'query':
@@ -84,24 +79,6 @@ class Server:
             return
         else:
             logging.info("message header unknown")
-
-    # def _handle_admin_msg(self, msg: str):
-    #     split_msg = msg.split()
-    #     # logging.info("handling admin msg:", msg)
-    #     if split_msg[0] == 'reg':
-    #         self._register_client(split_msg[1])
-    #         # logging.info("[admin msg]: register")
-    #         # self.admin_to_nodes_manager_msgs_queue.put(split_msg[0])
-    #         # # send path to reg/unreg
-    #         # self.admin_to_nodes_manager_msgs_queue.put(msg)
-    #         # # self._register_client(msg)
-    #     elif split_msg[0] == 'unreg':
-    #         self._unregister_client(split_msg[1])
-    #     elif split_msg[0] == 'query':
-    #         logging.info("[admin msg]: query")
-    #         self._query_client(split_msg[1])
-    #     else:
-    #         logging.info("Unknown command received from admin.")
 
     def _register_client(self, msg: str):
         logging.info("reg msg: {}".format(msg))

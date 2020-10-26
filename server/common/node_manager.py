@@ -104,27 +104,6 @@ class NodeManager:
         except:
             logging.error("an error occurred during node unregistration")
 
-    # def query_node(self, node_name: str, path: str):
-    #     # TODO adaptar esto segun como se guarde el backup.
-    #     # Seguramente sea un path al backup. Eso se le pasa desp.
-    #     # al que maneje el envio, que ira leyendo y enviando el archivo.
-    #     try:
-    #         logging.info("received node {}, path {}".format(node_name, path))
-    #         backup = self.nodes[(node_name, path)]
-    #         logging.info("query successfully completed")
-    #         return backup
-    #     except:
-    #         logging.error("an error occurred during node query")
-
-    # def attend_backups_requester_requests(self):
-    #     while True:
-    #         # TODO implementar
-    #         msg = self.pipe_to_backups_requester.recv()
-    #         logging.info("received msg in attend_backups_requester_requests: {}".format(msg))
-    #         if msg == "nodes_to_backup":
-    #             self.pipe_to_backups_requester.send(self.get_nodes_to_backup())
-    #         else:
-    #             logging.warning("Unknown message received from Backup requester: {}".format(msg))
     def check_which_nodes_to_backup(self):
         """send nodes to backup to backup requester"""
         while True:
@@ -165,43 +144,6 @@ class NodeManager:
         # TODO impl
         pass
 
-    # def get_last_md5_for_backup(self, filepath):
-    #     try:
-    #         return self.nodes[key]['paths_to_backups'][-1]['md5']
-    #     except IndexError:
-    #         return ""
-    #     except:
-    #         logging.info("error getting last md5 for backup")
-
-    # def get_last_filepath(self, key):
-    #     try:
-    #         return self.nodes[key]['paths_to_backups'][-1]['path_to_backup']
-    #     except IndexError:
-    #         return ""
-    #     except:
-    #         logging.info("error getting last filepath for backup")
-
-    # def receive_new_backup_path(self):
-    #     node, path = self.new_backup_path_queue_from_backup_requester_to_nodes_manager.get()
-    #     self.nodes_lock.acquire()
-    #     self.nodes((node['node'],node['path']))['']
-    #     self.nodes_lock.release()
-
-    # def md5Checksum(self, filepath):
-    #     # src: https://www.joelverhagen.com/blog/2011/02/md5-hash-of-file-in-python/
-    #     logging.info("getting md5 for {}".format(filepath))
-    #     if not filepath:
-    #         return ""
-    #     logging.info("checking md5")
-    #     m = hashlib.md5()
-    #     with open(filepath, 'rb') as fh:
-    #         while True:
-    #             data = fh.read(8192)
-    #             if not data:
-    #                 break
-    #             m.update(data)
-    #     return m.hexdigest()
-
     def get_filepath_last_backup(self, node_name, path):
         filename_to_match = node_name + "-" + path.replace("/", "-")
         logging.info("partial filename_to_match: {}".format(filename_to_match))
@@ -241,8 +183,3 @@ class NodeManager:
                             break
                         m.update(data)
         return m.hexdigest()
-    # def get_last_modified_time(self, filepath):
-    #     if filepath:
-    #         return os.path.getmtime(filepath)
-    #     else:
-    #         return 0

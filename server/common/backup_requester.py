@@ -28,21 +28,6 @@ class BackupRequester:
             self.request_backup_to_node(new_node_to_backup)
         logging.info("terminating backups requester...")
 
-    # def get_nodes_to_backup(self):
-    #     self.backup_requester_pipe_end.send("nodes_to_backup")
-    #     nodes_to_backup = self.backup_requester_pipe_end.recv()
-    #     logging.info("backuper received nodes to backup: {}".format(nodes_to_backup))
-    #     return nodes_to_backup
-
-    # def request_backup(self, nodes_to_backup):
-    #     """
-    #     Backups are requested concurrently making use of the thread pool.
-    #     :param nodes_to_backup:
-    #     :return:
-    #     """
-    #     for node in nodes_to_backup:
-    #         self.executor.submit(self.request_backup_to_node, node)
-
     def request_backup_to_node(self, node):
         """
         Each individual backup will be requested here.

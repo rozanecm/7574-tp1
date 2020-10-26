@@ -29,7 +29,6 @@ class Client:
 
         while self.keep_client_running.value:
             logging.info("in server loop")
-            # time.sleep(1)
             client_sock = self.__accept_new_connection()
             self.__handle_client_connection(client_sock)
 
@@ -89,10 +88,6 @@ class Client:
                 client_sock.shutdown(socket.SHUT_RDWR)
                 logging.info("before close")
                 client_sock.close()
-            # logging.info("before shutdown")
-            # client_sock.shutdown(socket.SHUT_RDWR)
-            # logging.info("before close")
-            # client_sock.close()
 
     def compress_path(self, path):
         """compress path to tgz"""
@@ -119,16 +114,6 @@ class Client:
                             break
                         m.update(data)
         return m.hexdigest()
-    #     # src: https://www.joelverhagen.com/blog/2011/02/md5-hash-of-file-in-python/
-    #     logging.info("checking md5")
-    #     m = hashlib.md5()
-    #     with open(filepath, 'rb') as fh:
-    #         while True:
-    #             data = fh.read(8192)
-    #             if not data:
-    #                 break
-    #             m.update(data)
-    #     return m.hexdigest()
 
     def send_tgz_to_client(self, client_sock, path_to_tgz):
         logging.info("sending tgz to client")
@@ -146,9 +131,3 @@ class Client:
         logging.info("removing tmp file")
         os.remove(path)
         logging.info("after removing tmp file")
-
-    # def get_last_modified_time(self, filepath):
-    #     try:
-    #         return os.path.getmtime(filepath)
-    #     except:
-    #         return 0
