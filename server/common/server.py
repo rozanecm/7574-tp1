@@ -7,7 +7,7 @@ from common.node_manager import NodeManager
 
 
 class Server:
-    def __init__(self, port, listen_backlog, keep_server_running, admin_to_nodes_manager_msgs_queue):
+    def __init__(self, port, listen_backlog, keep_server_running, admin_to_nodes_manager_msgs_queue, logger_queue):
         logging.info("initializing server")
         # Initialize server socket
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,6 +15,7 @@ class Server:
         self._server_socket.listen(listen_backlog)
         self.keep_server_running = keep_server_running
         self.admin_to_nodes_manager_msgs_queue = admin_to_nodes_manager_msgs_queue
+        self.logger_queue = logger_queue
 
     def run(self):
         """

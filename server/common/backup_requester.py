@@ -10,8 +10,9 @@ import re
 
 
 class BackupRequester:
-    def __init__(self, node_to_backup_queue_from_node_manager_to_backup_requester):
+    def __init__(self, node_to_backup_queue_from_node_manager_to_backup_requester, logger_queue):
         self.node_to_backup_queue_from_node_manager_to_backup_requester = node_to_backup_queue_from_node_manager_to_backup_requester
+        self.logger_queue = logger_queue
 
         self.executor = ThreadPoolExecutor(5)
 
@@ -49,10 +50,9 @@ class BackupRequester:
                 while data_received:
                     f.write(data_received)
                     data_received = s.recv(1024)
-                self.log_action("file received")
-            # self.new_backup_path_queue_from_backup_requester_to_nodes_manager.put((node, filename))
+            self.log_action("New backup saved from node {}, path {}. File name: {}".format(node['node'], node['path'], filename))
         else:
-            self.log_action("no need for update")
+            self.log_action("no need for update from node {}, path {}".format(node['node'], node['path']))
         s.close()
         logging.info("requesting backup to node {}".format(node))
 
@@ -67,5 +67,5 @@ class BackupRequester:
         return int(last_file_path.split(prefix)[1].split(".tgz")[0]) + 1
 
     def log_action(self, msg):
-        pass
-#         TODO impl
+        logging.info("will log msg: {}".format(msg))
+        self.logger_queue.put(msg)

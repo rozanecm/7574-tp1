@@ -12,7 +12,7 @@ MAX_NUM_OF_BACKUPS_TO_KEEP = 10
 
 class NodeManager:
     def __init__(self, keep_server_running, admin_to_nodes_manager_msgs_queue,
-                 node_to_backup_queue_from_node_manager_to_backup_requester):
+                 node_to_backup_queue_from_node_manager_to_backup_requester, logger_queue):
         # Nodes:
         #       K: (node_name, path)
         #       V: dict with Keys:
@@ -27,6 +27,7 @@ class NodeManager:
         # ipc
         self.admin_to_nodes_manager_msgs_queue = admin_to_nodes_manager_msgs_queue
         self.node_to_backup_queue_from_node_manager_to_backup_requester = node_to_backup_queue_from_node_manager_to_backup_requester
+        self.logger_queue = logger_queue
         # other
         self.keep_server_running = keep_server_running
 
@@ -145,6 +146,7 @@ class NodeManager:
         for file in files_for_this_backup:
             os.remove(file)
             logging.info("removed file: {}".format(file))
+            self.log_action("removed file: {}".format(file))
 
     def remove_old_backups_for_node(self, node):
         """delete old backups for this node to maintain the requested max number of backups."""
@@ -157,6 +159,7 @@ class NodeManager:
             os.remove(earliest_from_paths)
             files_for_this_backup.remove(earliest_from_paths)
             logging.info("removed earliest path: {}".format(earliest_from_paths))
+            self.log_action("removed earliest path: {}".format(earliest_from_paths))
 
     def get_filepath_last_backup(self, node_name, path):
         files_for_this_backup = self.get_filenames_for_node(node_name, path)
@@ -210,3 +213,6 @@ class NodeManager:
                             break
                         m.update(data)
         return m.hexdigest()
+
+    def log_action(self, msg):
+        self.logger_queue.put(msg)

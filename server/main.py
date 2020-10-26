@@ -8,6 +8,7 @@ from ctypes import c_bool
 from common.server import Server
 from common.backup_requester import BackupRequester
 from common.node_manager import NodeManager
+from common.logger import Logger
 from multiprocessing import Process, Manager, Value, Queue, Pipe
 
 
@@ -55,24 +56,36 @@ def main():
     # Used to signal that a backup is needed
     node_to_backup_queue_from_node_manager_to_backup_requester = Queue()
 
+    logger_queue = Queue()
+
     # Initialize server and start server loop
-    server = Server(config_params["port"], config_params["listen_backlog"], keep_server_running,
-                    admin_to_nodes_manager_msgs_queue)
-    node_manager = NodeManager(keep_server_running, admin_to_nodes_manager_msgs_queue,
-                               node_to_backup_queue_from_node_manager_to_backup_requester)
-    backup_requester = BackupRequester(node_to_backup_queue_from_node_manager_to_backup_requester)
+    server = Server(config_params["port"],
+                    config_params["listen_backlog"],
+                    keep_server_running,
+                    admin_to_nodes_manager_msgs_queue,
+                    logger_queue)
+    node_manager = NodeManager(keep_server_running,
+                               admin_to_nodes_manager_msgs_queue,
+                               node_to_backup_queue_from_node_manager_to_backup_requester,
+                               logger_queue)
+    backup_requester = BackupRequester(node_to_backup_queue_from_node_manager_to_backup_requester,
+                                       logger_queue)
+    logger = Logger(logger_queue, "logger.log")
 
     p1 = Process(target=server.run)
     p2 = Process(target=backup_requester.run)
     p3 = Process(target=node_manager.run)
+    p4 = Process(target=logger.run)
 
     p1.start()
     p2.start()
     p3.start()
+    p4.start()
 
     p1.join()
     p2.join()
     p3.join()
+    p4.join()
 
 
 def initialize_log():
