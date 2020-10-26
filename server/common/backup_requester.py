@@ -35,7 +35,6 @@ class BackupRequester:
         :param node: is fully described by dict with keys 'node', 'port', 'path', 'md5'
         :return:
         """
-        # TODO request backup and save it to file
         filename = os.getcwd() + "/" + self.get_filename(node['node'], node['port'], node['path'],
                                                          node['last_file_path'])
         logging.info("will save tgz to {}".format(filename))

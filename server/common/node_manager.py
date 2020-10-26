@@ -7,6 +7,8 @@ import threading
 import hashlib
 import tarfile
 
+MAX_NUM_OF_BACKUPS_TO_KEEP = 10
+
 
 class NodeManager:
     def __init__(self, keep_server_running, admin_to_nodes_manager_msgs_queue,
@@ -109,6 +111,7 @@ class NodeManager:
         while True:
             for node in self.get_nodes_to_backup():
                 self.node_to_backup_queue_from_node_manager_to_backup_requester.put(node)
+                self.remove_old_backups_for_node(node)
             time.sleep(1)
 
     def get_nodes_to_backup(self):
@@ -134,17 +137,41 @@ class NodeManager:
 
     def update_next_backup_time(self, nodes_to_backup):
         for node in nodes_to_backup:
-            # print(node)
             key = (node['node'], node['path'])
-            # print(key)
             self.nodes[key]["next_update_time"] = time.time() + self.nodes[key]["freq"]
 
     def delete_backups_for_node(self, nodes_key):
         """delete all backups for this node so there don't stay any dangling files."""
         # TODO impl
-        pass
+        files_for_this_backup = self.get_filenames_for_node(nodes_key[0], nodes_key[1])
+        logging.info("files_for_this_backup: {}".format(files_for_this_backup))
+        for file in files_for_this_backup:
+            os.remove(file)
+            logging.info("removed file: {}".format(file))
+
+    def remove_old_backups_for_node(self, node):
+        """delete old backups for this node to maintain the requested max number of backups."""
+        # TODO impl
+        if not node:
+            return
+        logging.info("remove_old_backups_for_node. node: {}".format(node))
+        files_for_this_backup = self.get_filenames_for_node(node['node'], node['path'])
+        while len(files_for_this_backup) > MAX_NUM_OF_BACKUPS_TO_KEEP:
+            earliest_from_paths = self.get_earliest_from_paths(files_for_this_backup)
+            os.remove(earliest_from_paths)
+            files_for_this_backup.remove(earliest_from_paths)
+            logging.info("removed earliest path: {}".format(earliest_from_paths))
 
     def get_filepath_last_backup(self, node_name, path):
+        files_for_this_backup = self.get_filenames_for_node(node_name, path)
+        if files_for_this_backup:
+            filepath_last_backup = self.get_latest_from_paths(files_for_this_backup)
+            logging.info("filepath last backup: {}".format(filepath_last_backup))
+            return filepath_last_backup
+        else:
+            return ""
+
+    def get_filenames_for_node(self, node_name, path):
         filename_to_match = node_name + "-" + path.replace("/", "-")
         logging.info("partial filename_to_match: {}".format(filename_to_match))
         files_for_this_backup = []
@@ -153,12 +180,7 @@ class NodeManager:
             if element[:len(filename_to_match)] == filename_to_match:
                 files_for_this_backup.append(element)
         logging.info("all files for this node, path: {}".format(files_for_this_backup))
-        if files_for_this_backup:
-            filepath_last_backup = self.get_latest_from_paths(files_for_this_backup)
-            logging.info("filepath last backup: {}".format(filepath_last_backup))
-            return filepath_last_backup
-        else:
-            return ""
+        return files_for_this_backup
 
     def get_latest_from_paths(self, paths):
         largest_path = ""
@@ -168,6 +190,15 @@ class NodeManager:
                 largest_number = int(''.join(filter(str.isdigit, path)))
                 largest_path = path
         return largest_path
+
+    def get_earliest_from_paths(self, paths):
+        smallest_path = ""
+        smallest_number = 1e100
+        for path in paths:
+            if int(''.join(filter(str.isdigit, path))) < smallest_number:
+                smallest_number = int(''.join(filter(str.isdigit, path)))
+                smallest_path = path
+        return smallest_path
 
     def md5Checksum(self, filepath):
         if not filepath:
