@@ -32,6 +32,7 @@ class Client:
             logging.info("in server loop")
             client_sock = self.__accept_new_connection()
             self.__handle_client_connection(client_sock)
+            # self.executor.submit(self.__handle_client_connection, client_sock)
 
     def __accept_new_connection(self):
         """
@@ -54,41 +55,40 @@ class Client:
         If a problem arises in the communication with the client, the
         client socket will also be closed
         """
-        # try:
-        msg = client_sock.recv(1024).rstrip()
-        logging.info(
-            'Message received from connection {}. Msg: {}'
-                .format(client_sock.getpeername(), msg))
-        self.__handle_msg(client_sock, msg.decode())
-        # except OSError:
-        #     logging.info("Error while reading socket {}".format(client_sock))
-        # finally:
-        #     client_sock.close()
+        try:
+            msg = client_sock.recv(1024).rstrip()
+            logging.info(
+                'Message received from connection {}. Msg: {}'
+                    .format(client_sock.getpeername(), msg))
+            if msg.decode() == "shutdown":
+                self.keep_client_running.value = False
+                return
+            else:
+                self.executor.submit(self.__handle_msg, client_sock, msg.decode())
+        except OSError:
+            logging.info("Error while reading socket {}".format(client_sock))
+        finally:
+            client_sock.close()
 
     def __handle_msg(self, client_sock, msg: str):
-        if msg == "shutdown":
-            self.keep_client_running.value = False
-            return
+        # Msg is a path to backup + hash in format
+        # path:md5
+        logging.info("msg received at client handling msg: {}".format(msg))
+        path, md5 = msg.split(":")
+        path_to_tgz = self.compress_path(path)
+        logging.info("new md5:      {}".format(self.md5Checksum(path_to_tgz)))
+        logging.info("received md5: {}".format(md5))
+        if self.md5Checksum(path_to_tgz) != md5:
+            client_sock.sendall("updates needed: y".encode())
+            self.send_tgz_to_client(client_sock, path_to_tgz)
+            self.remove_local_tgz(path_to_tgz)
         else:
-            # Msg is a path to backup + hash in format
-            # path:md5
-            # TODO completar
-            logging.info("msg received at client handling msg: {}".format(msg))
-            path, md5 = msg.split(":")
-            path_to_tgz = self.compress_path(path)
-            logging.info("new md5:      {}".format(self.md5Checksum(path_to_tgz)))
-            logging.info("received md5: {}".format(md5))
-            if self.md5Checksum(path_to_tgz) != md5:
-                client_sock.sendall("updates needed: y".encode())
-                self.send_tgz_to_client(client_sock, path_to_tgz)
-                self.remove_local_tgz(path_to_tgz)
-            else:
-                logging.info("won't send tgz")
-                client_sock.sendall("updates needed: n".encode())
-                logging.info("before shutdown")
-                client_sock.shutdown(socket.SHUT_RDWR)
-                logging.info("before close")
-                client_sock.close()
+            logging.info("won't send tgz")
+            client_sock.sendall("updates needed: n".encode())
+            logging.info("before shutdown")
+            client_sock.shutdown(socket.SHUT_RDWR)
+            logging.info("before close")
+            client_sock.close()
 
     def compress_path(self, path):
         """compress path to tgz"""

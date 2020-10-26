@@ -6,6 +6,7 @@ import time
 import threading
 import hashlib
 import tarfile
+from concurrent.futures import ThreadPoolExecutor
 
 MAX_NUM_OF_BACKUPS_TO_KEEP = 10
 
@@ -30,16 +31,15 @@ class NodeManager:
         self.logger_queue = logger_queue
         # other
         self.keep_server_running = keep_server_running
+        self.executor = ThreadPoolExecutor(5)
 
     def run(self):
         # os.chdir("datavolume1")
         t1 = threading.Thread(target=self.attend_requests)
         t2 = threading.Thread(target=self.check_which_nodes_to_backup, daemon=True)
-        # t3 = threading.Thread(target=self.receive_new_backup_path, daemon=True)
 
         t1.start()
         t2.start()
-        # t3.start()
 
         # join just the thread that receives the shutdown message from the requests manager.
         # The second thread is listening (blockingly) to the pipe
@@ -65,7 +65,8 @@ class NodeManager:
                 #       - 1: port
                 #       - 2: path
                 #       - 3: freq
-                self.register_node(msg[0], int(msg[1]), msg[2], int(msg[3]))
+                # self.register_node(msg[0], int(msg[1]), msg[2], int(msg[3]))
+                self.executor.submit(self.register_node, msg[0], int(msg[1]), msg[2], int(msg[3]))
             elif msg == "unreg":
                 msg = self.admin_to_nodes_manager_msgs_queue.recv()
                 logging.info("unreg msg: {}".format(msg))
@@ -73,7 +74,8 @@ class NodeManager:
                 # split msg:
                 #       - 0: node
                 #       - 1: path
-                self.unregister_node(msg[0], msg[1])
+                # self.unregister_node(msg[0], msg[1])
+                self.executor.submit(self.unregister_node, msg[0], msg[1])
             else:
                 logging.error("Unknown command received in node manager:", msg)
 

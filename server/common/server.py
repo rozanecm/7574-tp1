@@ -4,6 +4,7 @@ import time
 import os
 
 from common.node_manager import NodeManager
+from concurrent.futures import ThreadPoolExecutor
 
 
 class Server:
@@ -16,6 +17,7 @@ class Server:
         self.keep_server_running = keep_server_running
         self.admin_to_nodes_manager_msgs_queue = admin_to_nodes_manager_msgs_queue
         self.logger_queue = logger_queue
+        self.executor = ThreadPoolExecutor(5)
 
     def run(self):
         """
@@ -27,9 +29,9 @@ class Server:
         """
         while self.keep_server_running.value:
             logging.info("in server loop")
-            # TODO aceptar en thread pool.
             client_sock = self.__accept_new_connection()
-            self.__handle_client_connection(client_sock)
+            # self.__handle_client_connection(client_sock)
+            self.executor.submit(self.__handle_client_connection, client_sock)
         logging.info("terminating main server")
 
     def __accept_new_connection(self):
