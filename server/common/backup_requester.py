@@ -10,10 +10,7 @@ import re
 
 
 class BackupRequester:
-    def __init__(self, new_backup_path_queue_frm_backup_requester_to_nodes_manager,
-                 node_to_backup_queue_from_node_manager_to_backup_requester):
-
-        self.new_backup_path_queue_from_backup_requester_to_nodes_manager = new_backup_path_queue_frm_backup_requester_to_nodes_manager
+    def __init__(self, node_to_backup_queue_from_node_manager_to_backup_requester):
         self.node_to_backup_queue_from_node_manager_to_backup_requester = node_to_backup_queue_from_node_manager_to_backup_requester
 
         self.executor = ThreadPoolExecutor(5)
@@ -22,7 +19,6 @@ class BackupRequester:
         logging.info("now in dir: {}".format(os.getcwd()))
         while True:
             logging.info("requesting backups...")
-            # TODO completar esto
             new_node_to_backup = self.node_to_backup_queue_from_node_manager_to_backup_requester.get()
             if new_node_to_backup == "shutdown":
                 break

@@ -52,9 +52,6 @@ def main():
     # which need to be backed up to the Backup requester 
     admin_to_nodes_manager_msgs_queue = Queue()
 
-    # Used by backups requester to communicate the new backup up's path to the nodes manager
-    new_backup_path_queue_from_backup_requester_to_nodes_manager = Queue()
-
     # Used to signal that a backup is needed
     node_to_backup_queue_from_node_manager_to_backup_requester = Queue()
 
@@ -62,10 +59,8 @@ def main():
     server = Server(config_params["port"], config_params["listen_backlog"], keep_server_running,
                     admin_to_nodes_manager_msgs_queue)
     node_manager = NodeManager(keep_server_running, admin_to_nodes_manager_msgs_queue,
-                               new_backup_path_queue_from_backup_requester_to_nodes_manager,
                                node_to_backup_queue_from_node_manager_to_backup_requester)
-    backup_requester = BackupRequester(new_backup_path_queue_from_backup_requester_to_nodes_manager,
-                                       node_to_backup_queue_from_node_manager_to_backup_requester)
+    backup_requester = BackupRequester(node_to_backup_queue_from_node_manager_to_backup_requester)
 
     p1 = Process(target=server.run)
     p2 = Process(target=backup_requester.run)

@@ -12,7 +12,6 @@ MAX_NUM_OF_BACKUPS_TO_KEEP = 10
 
 class NodeManager:
     def __init__(self, keep_server_running, admin_to_nodes_manager_msgs_queue,
-                 new_backup_path_queue_from_backup_requester_to_nodes_manager,
                  node_to_backup_queue_from_node_manager_to_backup_requester):
         # Nodes:
         #       K: (node_name, path)
@@ -27,7 +26,6 @@ class NodeManager:
         self.nodes_lock = threading.Lock()
         # ipc
         self.admin_to_nodes_manager_msgs_queue = admin_to_nodes_manager_msgs_queue
-        self.new_backup_path_queue_frm_backup_requester_to_nodes_manager = new_backup_path_queue_from_backup_requester_to_nodes_manager
         self.node_to_backup_queue_from_node_manager_to_backup_requester = node_to_backup_queue_from_node_manager_to_backup_requester
         # other
         self.keep_server_running = keep_server_running
@@ -142,7 +140,6 @@ class NodeManager:
 
     def delete_backups_for_node(self, nodes_key):
         """delete all backups for this node so there don't stay any dangling files."""
-        # TODO impl
         files_for_this_backup = self.get_filenames_for_node(nodes_key[0], nodes_key[1])
         logging.info("files_for_this_backup: {}".format(files_for_this_backup))
         for file in files_for_this_backup:
@@ -151,7 +148,6 @@ class NodeManager:
 
     def remove_old_backups_for_node(self, node):
         """delete old backups for this node to maintain the requested max number of backups."""
-        # TODO impl
         if not node:
             return
         logging.info("remove_old_backups_for_node. node: {}".format(node))
