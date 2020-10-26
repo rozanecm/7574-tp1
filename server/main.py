@@ -37,27 +37,32 @@ def main():
     initialize_log()
     config_params = parse_config_params()
 
+    try:
+        os.mkdir("datavolume1/server")
+    except FileExistsError:
+        logging.info("path server/ already exists")
+    os.chdir("datavolume1/server")
+
     # docs de manager.dict(): https://docs.python.org/3/library/multiprocessing.html#sharing-state-between-processes
     manager = Manager()
     # the following variable will be set to False by the server when a termination msg is received.
     # The backup requester will run as long as this bool indicates the server should be kept running.
     keep_server_running = Value(c_bool, True)
 
-    # this queue is used to send msgs to the node manger.
-    # The Node manager should not use it to send msgs in the other direction,
-    # since nobody will be listening.
-    node_manager_queue = Queue()
+    # Nodes manager uses this queue to send the nodes
+    # which need to be backed up to the Backup requester 
+    admin_to_nodes_manager_msgs_queue = Queue()
 
-    # the pipe will be used for bi-directional
-    # communication between node and backup manager.
-    # The backup manager will request the nodes to backup,
-    # and the node manager will provide the list with them.
-    node_manager_pipe_end, backup_requester_pipe_end = Pipe()
+    # Used by backups requester to communicate the new backup up's path to the nodes manager
+    new_backup_path_queue_from_backup_requester_to_nodes_manager = Queue()
+
+    # Used to signal that a backup is needed
+    node_to_backup_queue_from_node_manager_to_backup_requester = Queue()
 
     # Initialize server and start server loop
-    server = Server(config_params["port"], config_params["listen_backlog"], keep_server_running, node_manager_queue)
-    node_manager = NodeManager(keep_server_running, node_manager_queue, node_manager_pipe_end)
-    backup_requester = BackupRequester(keep_server_running, node_manager_queue, backup_requester_pipe_end)
+    server = Server(config_params["port"], config_params["listen_backlog"], keep_server_running, admin_to_nodes_manager_msgs_queue)
+    node_manager = NodeManager(keep_server_running, admin_to_nodes_manager_msgs_queue, new_backup_path_queue_from_backup_requester_to_nodes_manager, node_to_backup_queue_from_node_manager_to_backup_requester)
+    backup_requester = BackupRequester(new_backup_path_queue_from_backup_requester_to_nodes_manager, node_to_backup_queue_from_node_manager_to_backup_requester)
 
     p1 = Process(target=server.run)
     p2 = Process(target=backup_requester.run)
