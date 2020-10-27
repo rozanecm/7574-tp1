@@ -73,15 +73,28 @@ new-content-creator:
 
 init-content-creators:
 	./content_creator.sh name1 a/file1.txt &
-	./content_creator.sh name1 a/a/file1.txt &
-	./content_creator.sh name2 a/file2.txt &
-	./content_creator.sh name3 b/file1.txt &
+	./content_creator.sh name2 a/a/file1.txt &
+	./content_creator.sh name3 a/a/a/file1.txt &
+	./content_creator.sh name4 b/file1.txt &
+	./content_creator.sh name5 b/b/file1.txt &
+	./content_creator.sh name6 b/b/b/file1.txt &
+	./content_creator.sh name7 a/b/file1.txt &
+	./content_creator.sh name8 b/a/file1.txt &
+	./content_creator.sh name9 c/file1.txt &
+	./content_creator.sh name10 c/b/file1.txt &
 .PHONY: init-content-creators
 
 kill-content-creators:
 	docker kill name1
 	docker kill name2
 	docker kill name3
+	docker kill name4
+	docker kill name5
+	docker kill name6
+	docker kill name7
+	docker kill name8
+	docker kill name9
+	docker kill name10
 .PHONY: kill-content-creators
 # *********************************
 #
@@ -91,14 +104,14 @@ admin-register-node:
 .PHONY: admin-register-node
 
 init-nodes:
-	echo "reg: samplenode1 123 samplepath 17" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
-	echo "reg: samplenode2 151 samplepath 25" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
-	echo "reg: samplenode3 161 samplepath 10" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
-	echo "reg: samplenode4 398 samplepath 13" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
-	echo "reg: samplenode5 629 samplepath 22" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
-	echo "reg: samplenode6 193 samplepath 21" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
-	echo "reg: samplenode7 193 samplepath 21" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
-	echo "reg: samplenode8 193 samplepath 21" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
+	echo "reg: cli1 15001 a/ 17" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
+	echo "reg: cli1 15001 a/a/ 25" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
+	echo "reg: cli2 15002 a/b/ 10" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
+	echo "reg: cli3 15003 b/b/ 13" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
+	echo "reg: cli4 15004 c/ 22" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
+	echo "reg: cli5 15005 c/b/ 21" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
+	echo "reg: cli6 15006 b/a/ 21" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
+	echo "reg: cli4 15004 a/a/a/ 21" | docker run -i --network=7574-tp1_testing_net busybox nc server 12345
 .PHONY: init-nodes
 
 admin-unregister-node:
