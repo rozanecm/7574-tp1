@@ -64,7 +64,8 @@ class Client:
                 self.keep_client_running.value = False
                 return
             else:
-                self.executor.submit(self.__handle_msg, client_sock, msg.decode())
+                self.__handle_msg(client_sock, msg.decode())
+                # self.executor.submit(self.__handle_msg, client_sock, msg.decode())
         except OSError:
             logging.info("Error while reading socket {}".format(client_sock))
         finally:
@@ -78,10 +79,13 @@ class Client:
         path_to_tgz = self.compress_path(path)
         logging.info("new md5:      {}".format(self.md5Checksum(path_to_tgz)))
         logging.info("received md5: {}".format(md5))
+        logging.info("comparison result: {}".format(self.md5Checksum(path_to_tgz) != md5))
         if self.md5Checksum(path_to_tgz) != md5:
             client_sock.sendall("updates needed: y".encode())
+            logging.info("updates needed: y")
             self.send_tgz_to_client(client_sock, path_to_tgz)
             self.remove_local_tgz(path_to_tgz)
+            logging.info("tgz successfully sent")
         else:
             logging.info("won't send tgz")
             client_sock.sendall("updates needed: n".encode())

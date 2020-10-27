@@ -23,8 +23,8 @@ class BackupRequester:
             new_node_to_backup = self.node_to_backup_queue_from_node_manager_to_backup_requester.get()
             if new_node_to_backup == "shutdown":
                 break
-            # self.request_backup_to_node(new_node_to_backup)
-            self.executor.submit(self.request_backup_to_node, new_node_to_backup)
+            self.request_backup_to_node(new_node_to_backup)
+            # self.executor.submit(self.request_backup_to_node, new_node_to_backup)
         logging.info("terminating backups requester...")
 
     def request_backup_to_node(self, node):
@@ -35,15 +35,14 @@ class BackupRequester:
         """
         filename = os.getcwd() + "/" + self.get_filename(node['node'], node['port'], node['path'],
                                                          node['last_file_path'])
-        logging.info("will save tgz to {}".format(filename))
+        logging.info("will save tgz for node {}, path {} to {}".format(node['node'], node['path'], filename))
         s = socket.socket()
         logging.info("about to connect to {}, {}".format(node['node'], node['port']))
         s.connect((node['node'], node['port']))
         s.sendall("{}:{}\n".format(node['path'],
                                    node['md5']).encode())
-        res = s.recv(len("updates needed: y")).rstrip()
+        res = self.recv_node_msg(s)
         logging.info("res: {}".format(res))
-        res = res.decode()
         logging.info("res decoded: {}".format(res))
         if res == "updates needed: y":
             with open(filename, 'wb') as f:
@@ -57,12 +56,22 @@ class BackupRequester:
         s.close()
         logging.info("requesting backup to node {}".format(node))
 
+    def recv_node_msg(self, s):
+        total_length = len("updates needed: y")
+        msg = b""
+        while len(msg) < total_length:
+            msg += s.recv(total_length)
+            logging.info("partially received msg from socket: {}".format(msg.decode()))
+        msg = msg.decode()
+        logging.info("received msg from socket: {}".format(msg))
+        return msg
+
     def get_filename(self, node_name, port, path, last_file_path):
         if last_file_path:
-            filepath_prefix = node_name + "-" + path.split("/")[0] + "-"
+            filepath_prefix = node_name + "-" + path.replace("/", "-")
             return filepath_prefix + str(self.get_number_of_backup(last_file_path, filepath_prefix)) + ".tgz"
         else:
-            return node_name + "-" + path.split("/")[0] + "-0.tgz"
+            return node_name + "-" + path.replace("/", "-") + "0.tgz"
 
     def get_number_of_backup(self, last_file_path, prefix):
         return int(last_file_path.split(prefix)[1].split(".tgz")[0]) + 1

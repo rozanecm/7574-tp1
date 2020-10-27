@@ -65,8 +65,8 @@ class NodeManager:
                 #       - 1: port
                 #       - 2: path
                 #       - 3: freq
-                # self.register_node(msg[0], int(msg[1]), msg[2], int(msg[3]))
-                self.executor.submit(self.register_node, msg[0], int(msg[1]), msg[2], int(msg[3]))
+                self.register_node(msg[0], int(msg[1]), msg[2], int(msg[3]))
+                # self.executor.submit(self.register_node, msg[0], int(msg[1]), msg[2], int(msg[3]))
             elif msg == "unreg":
                 msg = self.admin_to_nodes_manager_msgs_queue.recv()
                 logging.info("unreg msg: {}".format(msg))
@@ -74,8 +74,8 @@ class NodeManager:
                 # split msg:
                 #       - 0: node
                 #       - 1: path
-                # self.unregister_node(msg[0], msg[1])
-                self.executor.submit(self.unregister_node, msg[0], msg[1])
+                self.unregister_node(msg[0], msg[1])
+                # self.executor.submit(self.unregister_node, msg[0], msg[1])
             else:
                 logging.error("Unknown command received in node manager:", msg)
 
