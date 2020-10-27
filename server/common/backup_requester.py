@@ -23,8 +23,8 @@ class BackupRequester:
             new_node_to_backup = self.node_to_backup_queue_from_node_manager_to_backup_requester.get()
             if new_node_to_backup == "shutdown":
                 break
-            self.request_backup_to_node(new_node_to_backup)
-            # self.executor.submit(self.request_backup_to_node, new_node_to_backup)
+            # self.request_backup_to_node(new_node_to_backup)
+            self.executor.submit(self.request_backup_to_node, new_node_to_backup)
         logging.info("terminating backups requester...")
 
     def request_backup_to_node(self, node):
