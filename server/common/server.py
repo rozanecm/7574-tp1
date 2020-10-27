@@ -32,8 +32,8 @@ class Server:
         while self.keep_server_running.value:
             logging.info("in server loop")
             client_sock = self.__accept_new_connection()
-            self.__handle_client_connection(client_sock)
-            # self.executor.submit(self.__handle_client_connection, client_sock)
+            # self.__handle_client_connection(client_sock)
+            self.executor.submit(self.__handle_client_connection, client_sock)
         logging.info("terminating main server")
 
     def __accept_new_connection(self):
